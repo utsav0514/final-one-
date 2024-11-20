@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    stages {
+        
+        stage("git_pull") {
+            steps {
+                echo "Pulling the code from GitHub"
+                git url: "https://github.com/utsav0514/final-one-.git", branch: "main"
+            }
+        }
+        
+        stage("Build") {
+            steps {
+                echo "Building the code"
+                sh "docker build -t finalimage ."
+            }
+        }
+        
+        stage("Docker push") {
+            steps {
+                echo "Pushing the image to Docker"
+                withCredentials([usernamePassword(credentialsId: "dockerhub", passwordVariable: "dockerhubpass", usernameVariable: "dockerhubuser")]) {
+                    sh "docker tag finalimage ${env.dockerhubuser}/finalimage:latest"
+                    sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpass}"
+                    sh "docker push ${env.dockerhubuser}/finalimage:latest"
+                }
+            }
+        }
+        
+        stage("Deploy") {
+            steps {
+                echo "Deploying the node"
+                sh "docker run -td -p 8082 utsav0514/finalimage:latest"
+            }
+        }
+        
+    }
+}
