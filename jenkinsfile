@@ -30,7 +30,7 @@ pipeline {
         stage("Deploy") {
             steps {
                 echo "Deploying the node"
-                sh "docker-compose down && docker-compose up -d"
+                sh "docker run -td -p 8082 utsav0514/finalimage:latest"
             }
         }
         
